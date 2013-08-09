@@ -1,0 +1,25 @@
+!!!
+html(lang=en)
+  head
+    if blog.name
+      title=blog.name
+    else
+      title No such blog.
+  body
+    if blog.name
+      h1=blog.name
+    else
+      h1 No such blog.
+
+    if blog.name
+      if blog.description
+        h2=blog.description
+      else
+        h2 [No Description]
+
+      if posts.items.length == 0
+        p There are no posts.
+      else
+        h3=posts.items[0].title
+        
+        !=posts.items[0].content
