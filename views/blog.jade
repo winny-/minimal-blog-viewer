@@ -17,9 +17,12 @@ html(lang=en)
       else
         h2 [No Description]
 
+      hr
+
       if posts.items.length == 0
         p There are no posts.
       else
         h3=posts.items[0].title
+        h4='By: '+posts.items[0].author.displayName+' :: Published: '+posts.items[0].published+' :: Updated: '+posts.items[0].updated
         
         !=posts.items[0].content
