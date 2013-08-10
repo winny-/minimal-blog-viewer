@@ -6,7 +6,8 @@
   "dependencies": {
     "express": "3.x",
     "jade": "0.34.x",
-    "restify": "~2.6.0"
+    "restify": "~2.6.0",
+    "googleapis": "~0.4.2"
   },
   "scripts": {
     "start": "node app.js"
