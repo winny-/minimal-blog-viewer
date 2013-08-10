@@ -7,7 +7,6 @@ var settings = require(__dirname + '/settings.json');
 var app = express();
 var port = process.env.PORT || 3000;
 var bloggerApiKey = settings.bloggerApiKey;
-var bloggerApiDomain = 'https://www.googleapis.com/';
 app.engine('jade', jade.__express);
 app.set('view engine', 'jade');
 

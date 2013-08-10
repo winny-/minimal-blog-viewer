@@ -5,6 +5,13 @@ html(lang=en)
       title=blog.name
     else
       title No such blog.
+    style.
+      body {
+        font-family:sans-serif;
+      }
+      h1 {
+        font-family:serif;
+      }
   body
     if blog.name
       h1: a(href=blog.url)=blog.name
@@ -14,8 +21,6 @@ html(lang=en)
     if blog.name
       if blog.description
         h2=blog.description
-      else
-        h2 [No Description]
 
       hr
 
@@ -23,10 +28,14 @@ html(lang=en)
         p There are no posts.
       else
         h3: a(href=posts.items[0].url)=posts.items[0].title
-        h4='By: '+posts.items[0].author.displayName+' :: Published: '+posts.items[0].published+' :: Updated: '+posts.items[0].updated
+        h4='By: '
+          a(href=posts.items[0].author.url):=posts.items[0].author.displayName
+          =' // Published: '+posts.items[0].published+' // Updated: '+posts.items[0].updated
         
         !=posts.items[0].content
 
         hr
 
-        p(style='text-align:center;')='Copyright © '+posts.items[0].author.displayName+' '+posts.items[0].updated
+        p(style='text-align:center;')='Copyright © '
+          a(href=posts.items[0].author.url):=posts.items[0].author.displayName
+          =' '+posts.items[0].updated
