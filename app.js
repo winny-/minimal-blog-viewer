@@ -12,7 +12,13 @@ app.set('view engine', 'jade');
 
 
 function getBlogId(url, callback){
-  url = 'http://'+url+'/';
+  if (url.slice(0,7) != 'http://' && url.slice(0,8) != 'https://') {
+    url = 'http://'+url;
+  }
+  if (url.slice(-1) != '/') {
+    url += '/';
+  }
+  console.log('Querying for Blog Id for URL: '+url);
   googleapis.discover('blogger', 'v3').execute(function (err, client){
     var parameters = {
       url: url,
@@ -31,18 +37,17 @@ function getBlogId(url, callback){
 
 function getBlog(id, callback){
   googleapis.discover('blogger', 'v3').execute(function (err, client){
-    var parameters1 = {
+    var req1 = client.blogger.blogs.get({
       blogId: id,
       key: bloggerApiKey
-    }
-    req1 = client.blogger.blogs.get(parameters1);
+    });
     req1.execute(function (err, response1){
       var parameters2 = {
         blogId: id,
         maxResults: 1,
         key: bloggerApiKey
       }
-      req2 = client.blogger.posts.list(parameters2);
+      var req2 = client.blogger.posts.list(parameters2);
       req2.execute(function (err, response2){
         callback(response1, response2);
       });
@@ -50,26 +55,29 @@ function getBlog(id, callback){
   });
 }
 
+
 app.get('/', function (req, res){
-  res.set('Content-Type', 'text/plain');
-  res.send('Please try /blog/someblogidhere');
-  res.close();
+  res.set('Content-Type', 'text/html; charset=utf-8');
+  res.render('homepage.jade');
 });
 
-app.get('/blog/:id', function (req, res){
+app.get('/blog', function (req, res){
   res.set('Content-Type', 'text/html; charset=utf-8');
 
-  var id = req.params.id;
-  if (!isNaN(id)){
-    getBlog(id, function (blog, posts){
-      res.render('blog.jade', {blog:blog, posts:posts});
-    });
-  } else {
-    getBlogId(id, function(id){
-      getBlog(id, function (blog, posts){
+  var url = req.query.url;
+  var id = req.query.id;
+  if (typeof url !== 'undefined') {
+    getBlogId(url, function (id){
+      getBlog(id, function(blog, posts){
         res.render('blog.jade', {blog:blog, posts:posts});
       });
     });
+  } else if (!isNaN(id)) {
+    getBlog(id, function(blog, posts){
+      res.render('blog.jade', {blog:blog, posts:posts});
+    });
+  } else {
+    res.render('invalid.jade', {inputs:{url:url, id:id}});
   }
 });
 

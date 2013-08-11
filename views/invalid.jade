@@ -1,0 +1,15 @@
+!!!
+html(lang=en)
+  head
+    title Invalid request
+  body
+    p
+      | Invalid Request: 
+      if inputs.url
+        | bad url: 
+        =inputs.url
+      else if inputs.id
+        | bad id: 
+        =inputs.id
+      else
+        | no arguments passed.
