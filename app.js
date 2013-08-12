@@ -2,7 +2,7 @@ var express = require('express');
 var jade = require('jade');
 var googleapis = require('googleapis');
 
-var settings = require(__dirname + '/settings.json');
+var settings = {bloggerApiKey: process.env.GOOGLEAPI_BLOGGER_KEY}
 
 var app = express();
 var port = process.env.PORT || 3000;
