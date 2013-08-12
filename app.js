@@ -11,6 +11,7 @@ app.engine('jade', jade.__express);
 app.set('view engine', 'jade');
 
 
+/* Given `url` get the `id` for its corresponding blog. */
 function getBlogId(url, callback){
   if (url.slice(0,7) != 'http://' && url.slice(0,8) != 'https://') {
     url = 'http://'+url;
@@ -35,21 +36,30 @@ function getBlogId(url, callback){
   });
 }
 
-function getBlog(id, callback){
-  googleapis.discover('blogger', 'v3').execute(function (err, client){
+/* Given `id` for a blog, fetch the `blog` resource */
+function getBlog(id, callback) {
+  googleapis.discover('blogger', 'v3').execute(function (err, client) {
     var req1 = client.blogger.blogs.get({
       blogId: id,
       key: bloggerApiKey
     });
-    req1.execute(function (err, response1){
-      var parameters2 = {
+    req1.execute(function (err, blog) {
+      callback(blog);
+    });
+  });
+}
+
+/* Takes `id` and gets its corresponding `blog` object and gets the latest post in `posts`. */
+function getLastBlogPost(id, callback){
+    getBlog(id, function (blog) {
+      googleapis.discover('blogger', 'v3').execute(function (err, client){
+      var req2 = client.blogger.posts.list({
         blogId: id,
         maxResults: 1,
         key: bloggerApiKey
-      }
-      var req2 = client.blogger.posts.list(parameters2);
-      req2.execute(function (err, response2){
-        callback(response1, response2);
+      });
+      req2.execute(function (err, posts){
+        callback(blog, posts);
       });
     });
   });
@@ -66,16 +76,26 @@ app.get('/blog', function (req, res){
 
   var url = req.query.url;
   var id = req.query.id;
+  var range = req.query.range;
+
   if (typeof url !== 'undefined') {
     getBlogId(url, function (id){
-      getBlog(id, function(blog, posts){
-        res.render('blog.jade', {blog:blog, posts:posts});
-      });
+      if (typeof range === 'undefined' || range == '1-1') {
+        getLastBlogPost(id, function(blog, posts){
+          res.render('blog.jade', {blog:blog, posts:posts});
+        });
+      } else {
+        // Get arbritrary range of blog posts.
+      }
     });
   } else if (!isNaN(id)) {
-    getBlog(id, function(blog, posts){
-      res.render('blog.jade', {blog:blog, posts:posts});
-    });
+    if (typeof range === 'undefined' || range == '1-1') {
+      getLastBlogPost(id, function(blog, posts){
+        res.render('blog.jade', {blog:blog, posts:posts});
+      });
+    } else {
+      // Get arbritrary range of blog posts.
+    }
   } else {
     res.render('invalid.jade', {inputs:{url:url, id:id}});
   }

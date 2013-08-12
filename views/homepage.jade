@@ -9,5 +9,19 @@ html(lang=en)
       | No problem! Enter a blog URL and be on your merry way.
     form(method='get', action='/blog')
       | URL:
-      input(type='text', name='url')
+      input(type='text', name='url', value='code.blogger.com')
       input(type='submit')
+
+    script(src='//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js')
+    script(type='text/javascript').
+      window.onload = function () {
+        $('input[type=text]').focus().select();
+      }
+      $('input[type=text]').click(function () {
+        $(this).select();
+      });
+      $('*').keypress(function (e) {
+        if (e.which == 10 || e.which == 13) {
+          $('form').submit();
+        }
+      });
