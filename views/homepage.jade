@@ -8,7 +8,7 @@ html(lang=en)
       br
       | No problem! Enter a blog URL and be on your merry way.
     form(method='get', action='/blog')
-      | URL:
+      | URL: 
       input(type='text', name='id', value='code.blogger.com')
       input(type='submit')
 
@@ -17,10 +17,15 @@ html(lang=en)
       window.onload = function () {
         $('input[type=text]').focus().select();
       }
-      $('input[type=text]').click(function () {
+      var input = $('input[type=text]')
+      input.focus(function (e) {
         $(this).select();
       });
-      $('*').keypress(function (e) {
+      // http://stackoverflow.com/questions/1269722/selecting-text-on-focus-using-jquery-not-working-in-safari-and-chrome/1269767#1269767
+      input.mouseup(function (e) {
+        e.preventDefault();
+      });
+      $('body').keypress(function (e) {
         if (e.which == 10 || e.which == 13) {
           $('form').submit();
         }
