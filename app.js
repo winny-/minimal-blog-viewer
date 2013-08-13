@@ -18,11 +18,10 @@ function getBlogId(url, callback){
     url += '/';
   }
   googleapis.discover('blogger', 'v3').execute(function (err, client){
-    var req1 = client.blogger.blogs.getByUrl({
+    client.blogger.blogs.getByUrl({
       url: url,
       key: bloggerApiKey
-    });
-    req1.execute(function (err, response){
+    }).execute(function (err, response){
       callback(response.id);
     });
   });
@@ -31,34 +30,55 @@ function getBlogId(url, callback){
 /* Given `id` for a blog, fetch the `blog` resource */
 function getBlog(id, callback) {
   googleapis.discover('blogger', 'v3').execute(function (err, client) {
-    var req1 = client.blogger.blogs.get({
+    client.blogger.blogs.get({
       blogId: id,
       key: bloggerApiKey
-    });
-    req1.execute(function (err, blog) {
+    }).execute(function (err, blog) {
       callback(blog);
     });
   });
 }
 
-/* Takes `id` and gets its corresponding `blog` object and gets the latest post in `posts`. */
-function getLastBlogPost(id, callback){
-    getBlog(id, function (blog) {
-      googleapis.discover('blogger', 'v3').execute(function (err, client){
-      var req2 = client.blogger.posts.list({
-        blogId: id,
-        maxResults: 1,
-        key: bloggerApiKey
-      });
-      req2.execute(function (err, posts){
-        callback(blog, posts);
-      });
+/* Given `blogId` & `postId`, get that blog's `post`. */
+function getPost(blogId, postId, callback) {
+  googleapis.discover('blogger', 'v3').execute(function (err, client) {
+    client.blogger.posts.get({
+      blogId: blogId,
+      postId: postId,
+      key: bloggerApiKey
+    }).execute(function (err, post) {
+      callback(post);
     });
   });
 }
 
+/* Takes `id` and gets its last `post`. */
+function getLastPost(id, callback) {
+  googleapis.discover('blogger', 'v3').execute(function (err, client) {
+    client.blogger.posts.list({
+      blogId: id,
+      maxResults: 1,
+      key: bloggerApiKey
+    }).execute(function (err, posts) {
+      callback(posts.items[0]);
+    });
+  });
+}
 
-app.get('/', function (req, res){
+/* Helper that takes `datum`, determines if it's an ID or URL,
+ * does the appropriate query and then calls `getBlog()`.
+ */
+function getBlogInfo(datum, callback) {
+  if (!isNaN(datum)) {
+    getBlog(datum, callback);
+  } else {
+    getBlogId(datum, function (id) {
+      getBlog(id, callback);
+    });
+  }
+}
+
+app.get('/', function (req, res) {
   res.set('Content-Type', 'text/html; charset=utf-8');
   res.render('homepage.jade');
 });
@@ -66,30 +86,18 @@ app.get('/', function (req, res){
 app.get('/blog', function (req, res){
   res.set('Content-Type', 'text/html; charset=utf-8');
 
-  var url = req.query.url;
   var id = req.query.id;
   var range = req.query.range;
 
-  if (typeof url !== 'undefined') {
-    getBlogId(url, function (id){
-      if (typeof range === 'undefined' || range == '1-1') {
-        getLastBlogPost(id, function(blog, posts){
-          res.render('blog.jade', {blog:blog, posts:posts});
-        });
-      } else {
-        // Get arbritrary range of blog posts.
-      }
-    });
-  } else if (!isNaN(id)) {
-    if (typeof range === 'undefined' || range == '1-1') {
-      getLastBlogPost(id, function(blog, posts){
-        res.render('blog.jade', {blog:blog, posts:posts});
+  if (typeof range === 'undefined' || range == '1-1') {
+    getBlogInfo(id, function (blog) {
+      getLastPost(blog.id, function (post) {
+        res.render('last.jade', {blog:blog, post:post});
       });
-    } else {
-      // Get arbritrary range of blog posts.
-    }
+    });
   } else {
-    res.render('invalid.jade', {inputs:{url:url, id:id}});
+    // getBlogInfo(id, function (blog) {
+    //   for (var i = 
   }
 });
 

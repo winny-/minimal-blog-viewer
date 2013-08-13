@@ -24,18 +24,18 @@ html(lang=en)
 
       hr
 
-      if typeof posts.items === 'undefined'
+      if typeof post === 'undefined'
         p There are no posts.
       else
-        h3: a(href=posts.items[0].url)=posts.items[0].title
+        h3: a(href=post.url)=post.title
         h4='By: '
-          a(href=posts.items[0].author.url):=posts.items[0].author.displayName
-          =' // Published: '+posts.items[0].published+' // Updated: '+posts.items[0].updated
+          a(href=post.author.url):=post.author.displayName
+          =' // Published: '+post.published+' // Updated: '+post.updated
         
-        !=posts.items[0].content
+        !=post.content
 
         hr
 
         p(style='text-align:center;')='Copyright © '
-          a(href=posts.items[0].author.url):=posts.items[0].author.displayName
-          =' '+posts.items[0].updated
+          a(href=post.author.url):=post.author.displayName
+          =' '+post.updated
