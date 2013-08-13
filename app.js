@@ -2,11 +2,9 @@ var express = require('express');
 var jade = require('jade');
 var googleapis = require('googleapis');
 
-var settings = {bloggerApiKey: process.env.GOOGLEAPI_BLOGGER_KEY}
-
 var app = express();
 var port = process.env.PORT || 3000;
-var bloggerApiKey = settings.bloggerApiKey;
+var bloggerApiKey = process.env.GOOGLEAPI_BLOGGER_KEY;
 app.engine('jade', jade.__express);
 app.set('view engine', 'jade');
 
@@ -19,19 +17,13 @@ function getBlogId(url, callback){
   if (url.slice(-1) != '/') {
     url += '/';
   }
-  console.log('Querying for Blog Id for URL: '+url);
   googleapis.discover('blogger', 'v3').execute(function (err, client){
-    var parameters = {
+    var req1 = client.blogger.blogs.getByUrl({
       url: url,
       key: bloggerApiKey
-    }
-    var req1 = client.blogger.blogs.getByUrl(parameters);
+    });
     req1.execute(function (err, response){
-      var id = false;
-      if (!err) {
-        id = response.id;
-      }
-      callback(id);
+      callback(response.id);
     });
   });
 }
